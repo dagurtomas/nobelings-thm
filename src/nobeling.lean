@@ -36,7 +36,9 @@ def ab_u_Z : Ab.{u} := ⟨ulift.{u} ℤ⟩
 
 instance C_into_ab_is_ab (X : Top.{u}) (A : Ab.{u}) : add_comm_group (X ⟶ (Top.discrete.obj A)) :=
 begin
-  sorry,
+  have h : (add_comm_group (X → (Top.discrete.obj A))),
+  { 
+  },
 end
 
 theorem CSZ_is_free (S : Profinite.{u}) : ∃ (I : Type u) (f : AddCommGroup.of ((Profinite.to_Top.obj S) ⟶ (Top.discrete.obj ab_u_Z)) ⟶ AddCommGroup.of (free_abelian_group I)), is_iso f := 
