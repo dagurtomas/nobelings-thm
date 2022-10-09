@@ -13,9 +13,12 @@ def cst_to_bool (X : Type*) : X → bool := λ x, ⊤
 lemma indicator_continuous_iff_clopen {X : Type*} (U : set X) [topological_space X] :
   continuous (set.indicator U (cst_to_bool X)) ↔ is_clopen U :=
 begin
-  split,
-  { sorry },
-  { sorry },
+  let f := (set.indicator U (cst_to_bool X)),
+  have h : ∀ s : set bool, f ⁻¹' s ∈ {set.univ, U, Uᶜ, ∅}, 
+  exact λ s, set.indicator_const_preimage U s ⊤,
+  -- split,
+  -- { sorry },
+  -- { sorry },
 end
 
 def continuous_to_discrete {X Y : Type*} (f : X → Y) [topological_space X] : Prop := 
