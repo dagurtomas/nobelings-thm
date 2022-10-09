@@ -1,15 +1,64 @@
 import topology.connected
+import algebra.indicator_function
 import tactic.fin_cases
+
+noncomputable theory
 
 universe u
 
-instance disc_top_Prop : topological_space Prop := ⟨λ x, true, by triv, by tauto, by tauto⟩
-
-instance disc_Prop : discrete_topology Prop := by {fconstructor, refl}
+instance disc_top_Prop : topological_space Prop := ⊥
+instance disc_Prop : discrete_topology Prop := ⟨rfl⟩
 
 def char_func {X : Type u} (U : set X) : X → Prop := λ x, x ∈ U
 
+def Prop_to_bool : Prop → bool := λ x, x = true -- if hx : x = true then ⊤ else ⊥
+
+def char_func' {X : Type*} (U : set X) : X → bool := Prop_to_bool ∘ (char_func U) 
+
 def setProp : list (set Prop) := [∅, set.univ, {true}, {false}]
+
+def set_bool : list (set bool) := [∅, set.univ, {⊤}, {⊥}]
+
+lemma mem_set_bool (s : set bool) : s ∈ set_bool :=
+begin
+  by_cases ht : ⊤ ∈ s,
+    by_cases hf : ⊥ ∈ s,
+    { have h : s = set.univ,
+      ext, split, { tauto },
+      intros hx,
+      by_cases hx' : x = ⊤, { rw hx', exact ht },
+      { have hx'' : x = ⊥ := by tidy, rw hx'', exact hf }, 
+      unfold set_bool, tidy, tauto },
+    { have h : s = {⊤},
+      ext, split, 
+      { intros hx,
+        by_cases hx' : x = ⊤, { tauto }, 
+        have hx'' : x = ⊥ := by tidy, exfalso, apply hf, rw ← hx'', exact hx },
+      { intros hx,
+        by_cases hx' : x = ⊤, { rw hx', exact ht },
+        have hx'' : x = ⊥ := by tidy, exfalso, apply hx', exact hx, },
+      unfold set_bool, tidy, tauto, },
+    by_cases hf : ⊥ ∈ s,
+    { have h : s = {⊥},
+      ext, split, 
+      { intros hx,
+        by_cases hx' : x = ⊤,
+        { exfalso, apply ht, rw hx' at hx, exact hx },
+        have hx'' : x = ⊥ := by tidy, rw hx'', tauto, },
+      { intros hx,
+        by_cases hx' : x = ⊤,
+        { exfalso, rw hx' at hx, tauto }, 
+        have hx'' : x = ⊥ := by tidy, rw hx'', exact hf, },
+      unfold set_bool, tidy, tauto, },
+    { have h : s = ∅,
+      ext, split, swap, { tauto },
+      { intros hx,
+        exfalso,
+        by_cases hx' : x = ⊤, 
+        rw hx' at hx, apply ht, exact hx,
+        have hx'' : x = ⊥ := by tidy, rw hx'' at hx, apply hf, exact hx },
+      unfold set_bool, tidy, tauto },
+end
 
 lemma mem_setProp (s : set Prop) : s ∈ setProp :=
 begin
@@ -159,17 +208,17 @@ begin
   exact habU.1 hu',
 end
 
-lemma any_discrete {X : Type u} [topological_space X] (α : set X) [is_preconnected α] {Y : Type u} [topological_space Y] [discrete_topology Y] (f : X → Y) [continuous f] (a b : X) : a ∈ α → b ∈ α → f a = f b :=
+lemma any_discrete {X : Type u} [topological_space X] (α : set X) (hpa : is_preconnected α) {Y : Type u} [topological_space Y] [discrete_topology Y] (f : X → Y) [continuous f] (a b : X) : a ∈ α → b ∈ α → f a = f b :=
 begin
   intros ha hb,
   by_contra,
   let U := f ⁻¹' {f a},
   let V := f ⁻¹' ({f a}ᶜ),
   have hU : is_closed U,
-  { refine is_closed.preimage _inst_5 _, 
+  { refine is_closed.preimage _inst_4 _, 
     exact is_closed_discrete _ },
   have hV : is_closed V, 
-  { refine is_closed.preimage _inst_5 _,
+  { refine is_closed.preimage _inst_4 _,
     exact is_closed_discrete _, },
   have haU : (α ∩ U).nonempty,
   { use a,
@@ -186,7 +235,59 @@ begin
       exact hf } },
   have haUV : ¬(α ∩ (U ∩ V)).nonempty := by tidy,
   apply haUV,
-  exact is_preconnected_closed_iff.mp _inst_2 U V hU hV haUuV haU haV,
+  exact is_preconnected_closed_iff.mp hpa U V hU hV haUuV haU haV,
+end
+
+instance has_zero_bool : has_zero bool := ⟨⊥⟩
+
+def cst_to_bool (X : Type*) : X → bool := λ x, ⊤
+
+variables (X : Type*) 
+variables (U : set X)
+#check set.indicator U (cst_to_bool X)
+
+lemma indicator_continuous_iff_clopen {X : Type*} (U : set X) [topological_space X] :
+  continuous (set.indicator U (cst_to_bool X)) ↔ is_clopen U :=
+begin
+  split,
+  { sorry },
+  { sorry },
+end
+
+def continuous_to_discrete {X Y : Type u} (f : X → Y) [topological_space X] : Prop := 
+  ∀ y : Y, is_open (f ⁻¹' {y})
+
+lemma continuous_to_discrete_iff_continuous {X Y : Type u} (f : X → Y) [topological_space X] [topological_space Y] [discrete_topology Y] :
+  continuous_to_discrete f ↔ continuous f :=
+begin
+  split, swap, { exact λ hf y, continuous_def.mp hf {y} (is_open_discrete {y}) },
+  refine λ hf, {is_open_preimage := _},
+  intros U hU,
+  have hfU : f ⁻¹' U = ⋃ y ∈ U, f ⁻¹' {y} := by tidy,
+  rw hfU,
+  exact is_open_bUnion (λ y hy, hf y),
+end
+
+def continuous_to_discrete_implies_constant {X Y : Type*} (α : set X) (f : X → Y) 
+  [topological_space X] : Prop :=
+  continuous_to_discrete f → ∀ a b : X, a ∈ α → b ∈ α → f a = f b
+
+lemma is_preconnected_iff_continuous_to_bool_implies_constant {X : Type*} (α : set X) 
+  [topological_space X] : 
+  is_preconnected α ↔ ∀ f : X → bool, continuous_to_discrete_implies_constant α f :=
+begin
+  split,
+  { sorry },
+  { sorry },
+end
+
+lemma is_preconnected_iff_continuous_to_discrete_implies_constant {X : Type u} (α : set X) 
+  [topological_space X] : 
+  is_preconnected α ↔ ∀ Y : Type u, ∀ f : X → Y, continuous_to_discrete_implies_constant α f :=
+begin
+  split,
+  { sorry },
+  { sorry },
 end
 
 -- lemma preconnected_characterisation_converse {X : Type u} [topological_space X] (α : set X) [is_preconnected α] : ∀ f : X → Prop, continuous f → 
