@@ -6,6 +6,7 @@ Authors: Dagur Asgeirsson
 import topology.category.Profinite.as_limit
 import topology.category.Top.basic
 import topology.order
+import preconnected 
 import group_theory.free_abelian_group
 import algebra.category.Group.adjunctions
 import algebra.category.Group.filtered_colimits
@@ -389,7 +390,7 @@ def subset_prod (I : Type u) : set (prod_N I) :=
 def Eset (S : Profinite.{u}) (I : Type u) : set (prod_N I) :=
 begin
   intros x,
-
+  sorry,
 end
 
 -- variables I : Type u
