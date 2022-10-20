@@ -1,4 +1,5 @@
 import preconnected
+import connected_discrete
 
 universe u
 
