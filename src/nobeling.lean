@@ -361,12 +361,12 @@ def forget_ring : Ring.{u} ⥤ Ab.{u} :=
     fconstructor,
     intros r,
     exact f r,
-    simp at *,
+    { simp only [eq_self_iff_true, map_zero] },
     intros x y,
-    tidy,
+    simp only [map_add, add_left_inj, eq_self_iff_true],
   end,
-  map_id' := by tidy,
-  map_comp' := by tidy,
+  map_id' := by { intros X, refl },
+  map_comp' := by { intros X Y Z f g, refl },
 }
 
 -- def I_cst_map (I : Type u) : ℕ → Type u := λ n, I 
