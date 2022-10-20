@@ -254,9 +254,7 @@ lemma inj_to_prod (S : Profinite.{u}) : ∃ (I : Type u), ∃ (f : (Profinite.to
 
 def I' (S : Profinite.{u}) := (inj_to_prod S).some
 
--- def inj_to_prod_map (S : Profinite.{u}) : (Profinite.to_Top.obj S) ⟶ (prod01 (I S)) := {
-
--- },
+-- def inj_to_prod_map (S : Profinite.{u}) : (Profinite.to_Top.obj S) ⟶ (prod01 (I S))
 
 def lambda (S : Profinite.{u}) := ordinal.type (@well_ordering_rel (I' S))
 
