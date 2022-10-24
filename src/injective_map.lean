@@ -1,4 +1,4 @@
-import connected_discrete
+import topology.connected
 import topology.separation
 
 universe u
@@ -244,7 +244,7 @@ end
 
 #check set.ext_iff 
 
-lemma totally_separated_of_totally_disconnected_compact_hausdorff (α : Type*) 
+instance totally_separated_of_totally_disconnected_compact_hausdorff (α : Type*) 
   [topological_space α] [hc : compact_space α] [htd :totally_disconnected_space α] [hh : t2_space α] :
   totally_separated_space α :=
 begin
