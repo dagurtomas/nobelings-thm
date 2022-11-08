@@ -111,6 +111,9 @@ def prod_e {S : Profinite.{u}} (L : sub_prod (I S)) : CSZ S := finset.prod (e_in
 def Eset (S : Profinite.{u}) : set (sub_prod (I S)) := {L : sub_prod (I S) | ∀ s : finset (sub_prod (I S)), 
   (∀ L' : sub_prod (I S), L' ∈ s → (lex_order (I S)) L'.val L.val) → finset.sum s prod_e ≠ prod_e L}
 
+-- def Eset' (S : Profinite.{u}) : set (prod_N (I S)) := {L | ∀ s : finset (sub_prod (I S)), 
+--   (∀ L' : sub_prod (I S), L' ∈ s → (lex_order (I S)) L'.val L.val) → finset.sum s prod_e ≠ prod_e L}
+
 def Imu (S : Profinite.{u}) (mu : ordinal.{u}) : set (I S) := {i : (I S) | ordinal.typein well_ordering_rel i < mu}
 
 def Smu (S : Profinite.{u}) (mu : ordinal.{u}) : set S := (map_to_I' S) ⁻¹' {f : (I S) → bool | f ⁻¹' {tt} ⊆ Imu S mu}
@@ -169,6 +172,51 @@ def I_lsub (I : Type*) : ordinal := ordinal.lsub (I_map_ord I)
 
 def I_lsub_zero_iff (I : Type*) := @ordinal.lsub_eq_zero_iff I (I_map_ord I)
 
+lemma Imu_zero_is_empty (S : Profinite.{u}) : Imu S 0 = ∅ :=
+begin
+  unfold Imu,
+  ext, split, 
+  { intros hx,
+    exfalso,
+    have hx₁ : ordinal.typein well_ordering_rel x < 0 := hx,
+    have hx₂ : 0 ≤ ordinal.typein well_ordering_rel x := ordinal.zero_le _,
+    rw ← not_le at hx₁,
+    exact hx₁ hx₂ },
+  { tauto }, 
+end
+
+lemma Smu_zero_is_subsingleton (S : Profinite.{u}) : (Smu S 0).subsingleton :=
+begin
+  unfold Smu,
+  rw Imu_zero_is_empty S,
+  have h : {f : I S → bool | f ⁻¹' {tt} ⊆ ∅} = {function.const (I S) ff},
+  { ext f, split, 
+    { intros hf,
+      apply set.mem_singleton_of_eq,
+      ext,
+      simp only [function.const_apply],
+      by_contra',
+      rw eq_tt_eq_not_eq_ff at this,
+      have hx : x ∈ f ⁻¹' {tt} := this,
+      exact hf hx },
+    { intros hf,
+      rw (set.eq_of_mem_singleton hf),
+      exact subset_of_eq (set.preimage_const_of_not_mem (λ hff, bool.ff_ne_tt (set.eq_of_mem_singleton hff))) } },
+  rw h,
+  exact set.subsingleton.preimage set.subsingleton_singleton (inj_to_prod' S).2,
+end
+
+lemma Smu_prof_subsingleton (S : Profinite.{u}) : subsingleton (Smu_prof S 0) :=
+ (Smu S 0).subsingleton_coe.mpr (Smu_zero_is_subsingleton S)
+
+lemma Eset_zero_subsingleton (S : Profinite.{u}) [hS : subsingleton S] : (Eset S).subsingleton :=
+begin
+  unfold Eset,
+  intros a ha b hb,
+  ext,
+  -- apply (map_to_I' S),
+end
+
 theorem nobeling_mu (S : Profinite.{u}) (mu : ordinal) : 
   linear_independent ℤ ((Eset (Smu_prof S mu)).restrict prod_e) ∧ 
   submodule.span ℤ (prod_e '' (Eset (Smu_prof S mu))) = (⊤ : submodule ℤ (CSZ (Smu_prof S mu))) :=
@@ -178,7 +226,9 @@ begin
   cases ordinal.zero_or_succ_or_limit mu,
   { have he : is_empty (I (Smu_prof S mu)),
     { rw h,
-      rw ← I_lsub_zero_iff (I (Smu_prof S 0)), }, },
+      -- rw ← I_lsub_zero_iff (I (Smu_prof S 0)),
+      sorry, },
+      sorry, },
   cases h,
   { sorry },
   { sorry },
@@ -197,6 +247,7 @@ variables T : Profinite
 #check I_lsub_zero_iff (I T)
 #check I T
 #check S
+#check function.const (I S) ff
 
 theorem nobelings_thm (S : Profinite.{u}) : module.free ℤ (CSZ S) := -- ≅ free_abelian_group (Eset S) := 
 begin
