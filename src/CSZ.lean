@@ -206,6 +206,17 @@ begin
   exact set.subsingleton.preimage set.subsingleton_singleton (inj_to_prod' S).2,
 end
 
+lemma unique_Smu_zero (S : Profinite.{u}) [inhabited S] : unique (Smu S 0) :=
+begin
+  exact unique_of_subsingleton _,
+  -- refine {to_inhabited := _, uniq := _},
+  -- sorry,
+  -- intros a,
+  -- cases a,
+  -- exact (Smu_zero_is_subsingleton S) a_property trivial,
+  -- refine (Smu_zero_is_subsingleton S) a.property _,
+end
+
 lemma Smu_prof_subsingleton (S : Profinite.{u}) : subsingleton (Smu_prof S 0) :=
  (Smu S 0).subsingleton_coe.mpr (Smu_zero_is_subsingleton S)
 
@@ -214,7 +225,19 @@ begin
   unfold Eset,
   intros a ha b hb,
   ext,
+  sorry,
   -- apply (map_to_I' S),
+end
+
+instance no_zero_smul_divisors_CSZ (S : Profinite.{u}) : no_zero_smul_divisors ℤ (CSZ S) :=
+begin
+  refine {eq_zero_or_eq_zero_of_smul_eq_zero := _},
+  intros n f hnf, 
+  by_cases n = 0, 
+  { left, exact h },
+  right,
+  ext,
+  sorry,
 end
 
 theorem nobeling_mu (S : Profinite.{u}) (mu : ordinal) : 
@@ -224,11 +247,10 @@ begin
   induction mu using ordinal.induction with mu IH,
   simp only [] at IH,
   cases ordinal.zero_or_succ_or_limit mu,
-  { have he : is_empty (I (Smu_prof S mu)),
+  { split,
     { rw h,
-      -- rw ← I_lsub_zero_iff (I (Smu_prof S 0)),
-      sorry, },
-      sorry, },
+      apply linear_independent_unique, },
+    { sorry, }, },
   cases h,
   { sorry },
   { sorry },
